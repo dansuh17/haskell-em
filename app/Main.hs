@@ -1,6 +1,9 @@
 module Main where
 
 import Lib
+import DataSet (byteFile)
 
 main :: IO ()
-main = someFunc
+main = do
+    labelVec <- byteFile "src/label.csv"
+    putStrLn $ show labelVec
