@@ -9,22 +9,26 @@ data GeneratedData = GenData
 
 splitOn :: Char -> String -> [String]
 splitOn _ [] = []
-splitOn c bs = takeWhile (/= c) bs : (splitOn c remainder)
+splitOn c bs = takeWhile (/= c) bs : splitOn c remainder
   where
-    remainder = if length dropped == 0 then [] else tail dropped
+    remainder = if null dropped then [] else tail dropped
     dropped = dropWhile (/= c) bs
 
 -- read labels
 labelFromFile :: String -> IO (Vector R)
-labelFromFile fname = fromList <$> map read <$> splitOn '\n' <$> readFile fname
+labelFromFile fname = fromList . map read . splitOn '\n' <$> readFile fname
 
 -- data points
-sampleFromFile :: String -> IO ([Vector R])
+sampleFromFile :: String -> IO [Vector R]
 sampleFromFile fname = -- splitOn '\n'  -- split by lines
-    map fromList <$> map (map read . splitOn ',') <$> splitOn '\n' <$> readFile fname
+    map fromList . map (map read . splitOn ',') . splitOn '\n' <$> readFile fname
 
-readData :: String -> String -> IO (GeneratedData)
+-- read both label data and sample data and create a dataset
+readData :: String -> String -> IO GeneratedData
 readData datafile labelfile = do
   samp <- sampleFromFile datafile
   lab <- labelFromFile labelfile
   return $ GenData samp lab
+
+drawData :: GenData -> IO ()
+drawData = return
