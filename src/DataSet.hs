@@ -30,5 +30,5 @@ readData datafile labelfile = do
   lab <- labelFromFile labelfile
   return $ GenData samp lab
 
-drawData :: GenData -> IO ()
-drawData = return
+drawData :: GeneratedData -> IO ()
+drawData gd = return ()
