@@ -1,9 +1,9 @@
 module Main where
 
 import Lib
-import DataSet (byteFile)
+import DataSet (readData)
 
 main :: IO ()
 main = do
-    labelVec <- byteFile "src/label.csv"
-    putStrLn $ show labelVec
+    genData <- readData "src/data.csv" "src/label.csv"
+    putStrLn $ show genData

@@ -1,12 +1,30 @@
 module DataSet where
 
-import Numeric.LinearAlgebra (Vector, R, fromList)
+import Numeric.LinearAlgebra (Vector, Matrix, R, fromList)
+
+data GeneratedData = GenData
+    { sample :: [Vector R]
+    , label :: Vector R
+    } deriving (Show)
 
 splitOn :: Char -> String -> [String]
 splitOn _ [] = []
 splitOn c bs = takeWhile (/= c) bs : (splitOn c remainder)
   where
-    remainder = tail $ dropWhile (/= c) bs
+    remainder = if length dropped == 0 then [] else tail dropped
+    dropped = dropWhile (/= c) bs
 
-byteFile :: String -> IO (Vector R)
-byteFile fname = fromList <$> map read <$> splitOn '\n' <$> readFile fname
+-- read labels
+labelFromFile :: String -> IO (Vector R)
+labelFromFile fname = fromList <$> map read <$> splitOn '\n' <$> readFile fname
+
+-- data points
+sampleFromFile :: String -> IO ([Vector R])
+sampleFromFile fname = -- splitOn '\n'  -- split by lines
+    map fromList <$> map (map read . splitOn ',') <$> splitOn '\n' <$> readFile fname
+
+readData :: String -> String -> IO (GeneratedData)
+readData datafile labelfile = do
+  samp <- sampleFromFile datafile
+  lab <- labelFromFile labelfile
+  return $ GenData samp lab
