@@ -45,12 +45,12 @@ randomVariance numcls dim = do
 sampleGaussProb :: Vector R -> Matrix R -> Vector R -> Double
 sampleGaussProb mean cov samp = baseterm * expTerm
   where
-    diff = samp - mean
-    covInv = inv cov
-    expTerm = exp (0.5 * (diff `dot` (covInv #> diff)))  -- the exp term
+    diff :: Vector R = samp - mean
+    covInv :: Matrix R = inv cov
+    expTerm :: Double = exp (-0.5 * (diff `dot` (covInv #> diff)))  -- the exp term
     covDet = det cov
-    baseterm = 1 / ((sqrt (2 * pi) ^ dim) * covDet)  -- the multiplied term
-    dim = size mean
+    baseterm :: Double = 1 / sqrt (((2 * pi) ^ dim) * covDet)  -- the multiplied term
+    dim :: Int = size mean
 
 argmax :: Ord a => [a] -> Int
 argmax = fst . maximumBy (comparing snd) . zip [0..]
