@@ -1,10 +1,10 @@
 module DataSet where
 
-import Numeric.LinearAlgebra (Vector, Matrix, R, fromList)
+import Numeric.LinearAlgebra (Vector, R, fromList, meanCov, Herm, fromRows)
 
 data GeneratedData = GenData
-    { sample :: [Vector R]
-    , label :: Vector R
+    { sample :: ![Vector R]
+    , label :: !(Vector R)
     } deriving (Show)
 
 splitOn :: Char -> String -> [String]
@@ -31,4 +31,9 @@ readData datafile labelfile = do
   return $ GenData samp lab
 
 drawData :: GeneratedData -> IO ()
-drawData gd = return ()
+drawData _ = return ()
+
+dataMeanCov :: GeneratedData -> (Vector Double, Herm Double)
+dataMeanCov gendat = meanCov $ fromRows $ sample gendat
+
+-- classify :: GenerateData -> [[Vector R]]
