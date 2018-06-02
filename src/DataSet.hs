@@ -35,5 +35,3 @@ drawData _ = return ()
 
 dataMeanCov :: GeneratedData -> (Vector Double, Herm Double)
 dataMeanCov gendat = meanCov $ fromRows $ sample gendat
-
--- classify :: GenerateData -> [[Vector R]]
