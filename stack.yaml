@@ -39,7 +39,17 @@ packages:
 - .
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-# extra-deps: []
+extra-deps:
+- random-fu-multivariate-0.1.2.0
+- Chart-diagrams-1.8.3
+- SVGFonts-1.6.0.3
+- diagrams-core-1.4.1
+- diagrams-lib-1.4.2.2
+- diagrams-postscript-1.4.1
+- diagrams-svg-1.4.2
+- diagrams-solve-0.1.1
+- dual-tree-0.2.2
+
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

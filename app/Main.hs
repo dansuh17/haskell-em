@@ -2,7 +2,10 @@ module Main where
 
 import DataSet (readData)
 import EM (classifyInit, randomVariance, randomCentroids, classProbability)
-import Numeric.LinearAlgebra (meanCov, fromRows, fromList)
+import Numeric.LinearAlgebra (meanCov, fromRows, fromList, (><), sym)
+import Diagram (multiSamples)
+import Data.Random.Distribution.MultivariateNormal (Normal)
+import Data.Random
 
 main :: IO ()
 main = do
@@ -26,4 +29,10 @@ main = do
     randVars <- randomVariance nc dim
     print randVars
     let probs = classProbability genData (zip randCents randVars)
+    print probs
+
+    let mult = multiSamples
+        norm = Normal (fromList [0.0, 0.0]) (sym $ (2><2) [3.0, 0, 0, 3.0])
+        probs = map (pdf norm) mult
+
     print probs

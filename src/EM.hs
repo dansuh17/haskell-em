@@ -5,9 +5,11 @@ module EM where
 import System.Random
 import Data.List (maximumBy)
 import Data.Ord (comparing)
+import Data.List.Split (chunksOf)
 
 import DataSet (GeneratedData, sample)
 import Numeric.LinearAlgebra (Vector, R, fromList, Matrix, inv, (#>), dot, det, size, (><))
+import Data.Random.Distribution.MultivariateNormal ()
 
 -- make EM algorithm
 -- E-step
@@ -20,26 +22,51 @@ newtype EMClassifier = EMClassifier GeneratedData
 
 instance EMTrainer EMClassifier where
 
--- generate a random centroid having 'dim' dimension
-randomCentroid :: Int -> Double -> Double -> IO [Double]
-randomCentroid dim lowBound highBound = do
-    stdGen <- getStdGen
-    let rcs = randomRs (lowBound, highBound) stdGen
-    return $ take dim rcs
-
--- generate random cnetroids
--- MUST RUN SEPARATE RANDOM PROCESSES
+-- generate random centroids
+-- TODO: MUST RUN SEPARATE RANDOM PROCESSES
 randomCentroids :: Int -> Int -> Double -> Double -> IO [Vector R]
-randomCentroids numCenter dim lb hb = mapM (fromList <$>) centroids
-  where
-    centroids = replicate numCenter $ randomCentroid dim lb hb
+randomCentroids numCenter dim lb hb = do
+    stdGen <- getStdGen
+    let randomStream :: [R] = randomRs (lb, hb) stdGen
+        nums = take (dim * numCenter) randomStream
+        chunks = chunksOf dim nums
+    return $ map fromList chunks
+-- randomCentroids numCenter dim lb hb = do
+--     stdGen <- getStdGen  -- initial random generator
+--     fst <$> randomCentroidRec ([], stdGen) numCenter
+--   where
+--     randomCentroidRec :: RandomGen g => ([Vector R], g) -> Int -> IO ([Vector R], g)
+--     randomCentroidRec state@(accum, gen) remnum =
+--       if remnum == 0
+--       then return state  -- complete the recursion
+--       else do
+--         (centroid, nextgen) <- randomCentroid gen dim lb hb
+--         let centroidVec = fromList centroid
+--         -- pass the next generator state and accumulated values
+--         randomCentroidRec (centroidVec:accum, nextgen) (remnum - 1)
 
 -- initialize all covariance to 1.0
+-- TODO: MUST RUN SEPARATE RANDOM PROCESSES
 randomVariance :: Int -> Int -> IO [Matrix R]
 randomVariance numcls dim = do
     stdGen <- getStdGen
-    let rcs = randomRs (0.5, 1.5) stdGen
-    return $ replicate numcls $ (dim><dim) rcs
+    let randomStream :: [R] = randomRs (10, 20) stdGen
+        totalNum = dim * dim * numcls
+        nums = take totalNum randomStream
+        chunks = chunksOf (dim * dim) nums
+    return $ map (dim><dim) chunks
+-- randomVariance numcls dim = do
+--     stdGen <- getStdGen
+--     fst <$> randomVarRec ([], stdGen) numcls
+--   where
+--     randomVarRec :: RandomGen g => ([Matrix R], g) -> Int -> IO ([Matrix R], g)
+--     randomVarRec state@(accum, gen) remnum =
+--         if remnum == 0
+--         then return state
+--         else do
+--             let (rcs, nextgen) = randomR (0.5, 1.5) gen
+--                 mat = (dim><dim) rcs
+--             randomVarRec (mat:accum, nextgen) (remnum - 1)
 
 -- caculate the bivariate gaussian probability of a sample data
 sampleGaussProb :: Vector R -> Matrix R -> Vector R -> Double
@@ -52,6 +79,7 @@ sampleGaussProb mean cov samp = baseterm * expTerm
     baseterm :: Double = 1 / sqrt (((2 * pi) ^ dim) * covDet)  -- the multiplied term
     dim :: Int = size mean
 
+-- TODO: test required
 argmax :: Ord a => [a] -> Int
 argmax = fst . maximumBy (comparing snd) . zip [0..]
 
