@@ -6,9 +6,11 @@ import Numeric.LinearAlgebra (meanCov, fromRows, fromList, (><), sym)
 import Diagram (multiSamples)
 import Data.Random.Distribution.MultivariateNormal (Normal)
 import Data.Random
+import EmCoin (ciks, thetaPrime)
 
 main :: IO ()
 main = do
+{-
     genData <- readData "src/data.csv" "src/label.csv"
     print genData
 
@@ -30,9 +32,13 @@ main = do
     print randVars
     let probs = classProbability genData (zip randCents randVars)
     print probs
+    -}
+    print ciks
+    print thetaPrime
 
+{-
     let mult = multiSamples
         norm = Normal (fromList [0.0, 0.0]) (sym $ (2><2) [3.0, 0, 0, 3.0])
         probs = map (pdf norm) mult
-
-    print probs
+        -}
+    -- print probs
