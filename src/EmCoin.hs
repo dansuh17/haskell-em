@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module EmCoin where
 
 import Numeric.LinearAlgebra ()
@@ -5,6 +6,7 @@ import Numeric.LinearAlgebra ()
 theta :: [Double]
 theta = [0.5, 0.8]  -- initialization
 
+-- observed data - (head, tail)
 observed :: [(Int, Int)]
 observed = [(5, 5), (7, 3), (8, 2), (9, 1), (8, 1), (4, 6), (5, 5), (7, 3), (2, 8), (3, 7), (4, 6)]
 
@@ -62,3 +64,12 @@ thetaUpdated obsvd cik = zipWith (/) weightedHead sums
 -- updated prime numbers
 thetaPrime :: [Double]
 thetaPrime = thetaUpdated observed ciks
+
+-- returns all thetas through the iteration
+emIterate :: [[Double]] -> [(Int, Int)] -> [Double] -> Int -> [[Double]]
+emIterate prevThetas obsvd coinprobs numIter = if numIter == 0 then prevThetas else
+    emIterate (newTheta:prevThetas) obsvd coinprobs (numIter - 1)
+  where
+    coinExp :: [[Double]] = coinExpected obsvd prevTheta coinprobs  -- E step
+    prevTheta :: [Double] = head prevThetas
+    newTheta = thetaUpdated obsvd coinExp  -- M step

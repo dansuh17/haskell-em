@@ -1,12 +1,6 @@
 module Main where
 
-import DataSet (readData)
-import EM (classifyInit, randomVariance, randomCentroids, classProbability)
-import Numeric.LinearAlgebra (meanCov, fromRows, fromList, (><), sym)
-import Diagram (multiSamples)
-import Data.Random.Distribution.MultivariateNormal (Normal)
-import Data.Random
-import EmCoin (ciks, thetaPrime)
+import EmCoin (ciks, thetaPrime, emIterate, theta, observed, probCoin)
 
 main :: IO ()
 main = do
@@ -36,6 +30,7 @@ main = do
     print ciks
     print thetaPrime
 
+    print $ emIterate [theta] observed probCoin 10
 {-
     let mult = multiSamples
         norm = Normal (fromList [0.0, 0.0]) (sym $ (2><2) [3.0, 0, 0, 3.0])
