@@ -27,7 +27,7 @@ main = do
     let probs = classProbability genData (zip randCents randVars)
     print probs
     -}
-    print ciks
+    mapM_ print $ zip observed ciks
     print thetaPrime
 
     print $ emIterate [theta] observed probCoin 10
