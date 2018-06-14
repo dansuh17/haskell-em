@@ -1,6 +1,6 @@
 module Main where
 
-import EmCoin (ciks, thetaPrime, emIterate, theta, observed, probCoin)
+import EmCoin (ciks, thetaPrime, emIterate, theta, observed, probCoin, testObserved)
 
 main :: IO ()
 main = do
@@ -27,6 +27,7 @@ main = do
     let probs = classProbability genData (zip randCents randVars)
     print probs
     -}
+    print $ testObserved observed
     mapM_ print $ zip observed ciks
     print thetaPrime
 

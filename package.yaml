@@ -30,6 +30,7 @@ dependencies:
 - random-fu
 - Chart-diagrams
 - random-source
+- transformers
 
 library:
   source-dirs: src

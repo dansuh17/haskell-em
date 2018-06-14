@@ -3,17 +3,20 @@ module EmCoin where
 
 import Numeric.LinearAlgebra ()
 
+-- initial parameters
 theta :: [Double]
-theta = [0.1, 0.3]  -- initialization
+theta = [0.1, 0.3]
 
 -- observed data - (head, tail)
 observed :: [(Int, Int)]
-observed = [(5, 5), (5, 5), (7, 3), (8, 2), (9, 1), (8, 2), (4, 6), (5, 5), (7, 3), (2, 8), (3, 7), (4, 6)]
+observed = [(5, 5), (5, 5), (7, 3), (8, 2), (9, 1), (8, 2),
+            (4, 6), (5, 5), (7, 3), (2, 8), (3, 7), (4, 6)]
 
 -- test the validity of observed data
 testObserved :: [(Int, Int)] -> Bool
 testObserved = foldl (\acc (hd, tl) -> ((hd + tl == 10) && acc)) True
 
+-- probability of coin being generated
 probCoin :: [Double]
 probCoin = [0.5, 0.5]
 
