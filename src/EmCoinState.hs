@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module EmCoinState where
 
-import Numeric.LinearAlgebra (Vector, R, Matrix, vector, fromList, toList, fromRows, toRows, tr', (<.>))
+import Numeric.LinearAlgebra (Vector, R, Matrix, vector, fromList, toList, fromRows, toRows, tr', (<.>), size)
 import Control.Monad.Trans.State ()
 
 numThrows :: R
@@ -64,28 +64,29 @@ ciks :: Matrix R
 ciks = coinExpected observed theta probCoin
 
 -- [deprecated] replaced with (<.>) (dot product)
-weightedSum :: Vector R -> Vector R -> R
+-- weightedSum :: Vector R -> Vector R -> R
 -- weightedSum x w = sum $ zipWith (*) (toList x) (toList w)
-weightedSum = (<.>)
+-- weightedSum = (<.>)
 
 -- expected values (probabilities) per coin
 -- changes row-based 'coinExpected' to column-based 'sampleExpectedValues'
-sampleExpectedValues :: Matrix R -> Matrix R
+--sampleExpectedValues :: Matrix R -> Matrix R
 -- sampleExpectedValues sampExps = fromRows [ map (!! coinidx) (toRows sampExps) | coinidx <- [0..(numCoins - 1)] ]
 --   where
 --     numCoins = length $ head (toRows sampExps)
-sampleExpectedValues = tr'  -- this is simply a transpose operation
+-- sampleExpectedValues = tr'  -- this is simply a transpose operation
 
 -- M-step = calculate theta
 -- theta_coin = sum (weighted heads) / sum (weighted total_throws)
 thetaUpdated :: Vector R -> Matrix R -> Vector R
 thetaUpdated obsvd cik = fromList $
   map (\x ->  -- expeced values for coin
-    x <.> obsvd / x <.> vector (repeat numThrows))
+    x <.> obsvd / x <.> vector (replicate numSamps numThrows))
     (toRows sampleExpected)  -- becomes a list of : [expected values of all samples for coin]
   where
     -- expected values per coin. if there are two coins, length sampleExpected == 2
-    sampleExpected :: Matrix R = sampleExpectedValues cik
+    sampleExpected :: Matrix R = tr' cik
+    numSamps :: Int = snd (size sampleExpected)
 
 -- updated prime numbers
 thetaPrime :: Vector R

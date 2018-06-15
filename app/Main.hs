@@ -1,7 +1,7 @@
 module Main where
 
 import EmCoinState (ciks, thetaPrime, emIterate, theta, observed, probCoin, testObserved)
-import Numeric.LinearAlgebra (toList, toRows)
+import Numeric.LinearAlgebra (toList, toRows, size)
 
 main :: IO ()
 main = do
@@ -29,6 +29,8 @@ main = do
     print probs
     -}
     print $ testObserved observed
+    print $ size observed
+    print $ size ciks
     mapM_ print $ zip (toList observed) (toRows ciks)
     print thetaPrime  -- TODO: looping infinitely!
 
