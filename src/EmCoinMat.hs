@@ -1,32 +1,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module EmCoinState where
+module EmCoinMat where
 
-import Numeric.LinearAlgebra
-    (Vector
-    , R
-    , Matrix
-    , vector
-    , fromList
-    , toList
-    , fromRows
-    , (<.>)  -- dot product (vector)
-    , (><)  -- matrix formation
-    , (<>)  -- matmul
-    , size
-    , toRows
-    , fromColumns
-    )
-import Control.Monad.Trans.State (State, put, state, get)
-import Control.Monad (replicateM)
+import Numeric.LinearAlgebra (Vector, R, Matrix, vector, fromList, toList, fromRows, (<.>), size, toRows, fromColumns, (><), (<>))
+import Control.Monad.Trans.State ()
 
 -- total number of throws
 totalThrow :: R
 totalThrow = 10
 
 -- initial parameters
--- initial bias of two coins giving heads
-initParam :: Vector R  -- vector of real values - R is just an alias of Double
-initParam = vector [0.1, 0.3]
+theta :: Vector R  -- vector of real values - R is just an alias of Double
+theta = vector [0.1, 0.3]
 
 -- observed data represented by the number of heads in 10 coin-flips
 observed :: Vector R
@@ -40,12 +24,12 @@ testObserved = foldl (\acc hd -> ((hd <= 10) && acc)) True . toList
 probCoin :: Vector R
 probCoin = vector [0.5, 0.5]
 
--- define type parameters
-type Params = Vector R
-
 -- binomial probability
 binomProb :: Matrix R -> Matrix R -> Matrix R -> Matrix R
-binomProb hs tails bs = (bs ** hs) * ((1 - bs) ** tails)
+binomProb heads tails bias = (bias ** heads) * ((1 - bias) ** tails)
+
+-- eventProb :: R -> R -> R -> R
+-- eventProb numhead bias coinprob = coinprob * binomProb numhead (totalThrow - numhead) bias
 
 -- probability that an event will happen = P(coin) * P(num_heads | coin)
 eventProb :: Vector R -> Vector R -> Vector R -> Matrix R
@@ -78,18 +62,15 @@ columnNormalize x = x / colSum
 -- P(coin_i | observed, theta) = P(observed | coin_i, theta) * P(coin_i) / sum_over_k( P(observed | coin_k, theta) * P(coin_k) )
 -- prod_over_x ( binom x_head (10 - x_head) coin_i_bias * 0.5 )
 -- resulting size : (num_coins, num_examples)
-calcCoinExp :: Vector R -> Vector R -> State Params (Matrix R)
-calcCoinExp heads coinProbs = state $ \params ->
-  (columnNormalize (eventProb heads params coinProbs), params)  -- doesn't modify the state
+coinExpected :: Vector R -> Vector R -> Vector R -> Matrix R
+coinExpected heads biases coinprobs = columnNormalize eventp
+  where
+    eventp = eventProb heads biases coinprobs
 
 -- M-step = calculate updated theta
 -- new_theta_coin = sum (weighted heads) / sum (weighted total_throws)
-updateParams :: Vector R -> Matrix R -> State Params ()
-updateParams heads coinExps = state $ const ((), calcUpdatedParams heads coinExps)
-
--- calculate the next parameters
-calcUpdatedParams :: Vector R -> Matrix R -> Vector R
-calcUpdatedParams obsvd exps = fromList $
+thetaUpdated :: Vector R -> Matrix R -> Vector R
+thetaUpdated obsvd exps = fromList $
   map (\weightVec ->  -- expeced values for coin
           weightVec <.> obsvd / weightVec <.> totalThrows)  -- weighted sum = dot product
       sampleExpected
@@ -99,22 +80,11 @@ calcUpdatedParams obsvd exps = fromList $
     totalThrows :: Vector R = vector $ replicate numSamps totalThrow
     numSamps :: Int = size $ head sampleExpected
 
--- initialize the state (unknown parameters)
-initEm :: Vector R -> State Params ()
-initEm initParams = do
-    put initParams
-    return ()
-
--- state contains the parameters.
--- TODO : make state processing function output a log-likelihood + current state
-emStep :: Vector R -> Vector R -> State Params ()
-emStep heads coinProbs = calcCoinExp heads coinProbs >>= updateParams heads
-
--- one stepper state for EM
--- after the step, return the current state
-emStepper :: State Params Params
-emStepper = emStep observed probCoin >> get
-
--- iterate EM algorithm multiple times and collect intermediate params
-emIter :: Int -> State Params [Params]
-emIter numIter = replicateM numIter emStepper
+-- returns all thetas through the iteration
+emIterate :: [Vector R] -> Vector R -> Vector R -> Int -> [Vector R]
+emIterate prevThetas obsvd coinprobs numIter = if numIter == 0 then prevThetas else
+    emIterate (newTheta:prevThetas) obsvd coinprobs (numIter - 1)
+  where
+    coinExp = coinExpected obsvd prevTheta coinprobs  -- E step
+    prevTheta = head prevThetas
+    newTheta = thetaUpdated obsvd coinExp  -- M step
