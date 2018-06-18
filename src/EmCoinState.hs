@@ -1,6 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module EmCoinState where
 
+import Control.Monad.Trans.State (State, put, state, get)
+import Control.Monad (replicateM)
 import Numeric.LinearAlgebra
     (Vector
     , R
@@ -16,8 +18,6 @@ import Numeric.LinearAlgebra
     , toRows
     , fromColumns
     )
-import Control.Monad.Trans.State (State, put, state, get)
-import Control.Monad (replicateM)
 
 -- total number of throws
 totalThrow :: R
