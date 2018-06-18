@@ -3,7 +3,7 @@ module Main where
 import Numeric.LinearAlgebra (size, tr', vector)
 import Control.Monad.Trans.State (runState, evalState)
 import Control.Monad (mapM_)
-import DataGen (samples)
+import DataGen (generateCoinSamples)
 import EmCoinMat (emIterate, theta, observed, probCoin, testObserved, eventProb, columnSum, coinExpected)
 import EmCoinState (emStepper, emIter, initEm)
 
@@ -31,5 +31,6 @@ main = do
     -- using 'evalState' and pretty printing
     mapM_ printIterNum $ zip [1..] (evalState (initEm (vector [0.1, 0.3]) >> emIter 10) $ vector [])
 
-    samps <- samples
+    -- generate coin samples
+    samps <- generateCoinSamples 10 [(0.8, 8), (0.3, 5)]
     print samps
