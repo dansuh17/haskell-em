@@ -10,11 +10,11 @@ totalThrow = 10
 
 -- initial parameters
 theta :: Vector R  -- vector of real values - R is just an alias of Double
-theta = vector [0.1, 0.3]
+theta = vector [0.4, 0.6]
 
 -- observed data represented by the number of heads in 10 coin-flips
 observed :: Vector R
-observed = vector [5, 5, 7, 8, 9, 8, 4, 5, 7, 2, 3, 4, 4, 4, 8, 8, 9, 8]
+observed = vector [2, 9, 7, 8, 9, 8, 3, 3, 7, 2]
 
 -- test the validity of observed data - should be less than 10
 testObserved :: Vector R -> Bool

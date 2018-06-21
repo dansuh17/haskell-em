@@ -25,8 +25,8 @@ totalThrow = 10
 
 -- initial parameters
 -- initial bias of two coins giving heads
-initParam :: Vector R  -- vector of real values - R is just an alias of Double
-initParam = vector [0.1, 0.3]
+initParam :: Params  -- vector of real values - R is just an alias of Double
+initParam = vector [0.4, 0.6]
 
 -- observed data represented by the number of heads in 10 coin-flips
 headObserved :: Vector R
@@ -73,13 +73,13 @@ columnNormalize x = x / colSum
 
 -- E-step == expected values of coins
 -- each row (index axis 0) => examples
--- each colums (index axis 1) => coin's expected values (per example)
---
+-- each columns (index axis 1) => coin's expected values (per example)
+
 -- P(coin_i | observed, theta) = P(observed | coin_i, theta) * P(coin_i) / sum_over_k( P(observed | coin_k, theta) * P(coin_k) )
 -- prod_over_x ( binom x_head (10 - x_head) coin_i_bias * 0.5 )
 -- resulting size : (num_coins, num_examples)
-calcCoinExp :: Vector R -> Vector R -> State Params (Matrix R)
-calcCoinExp heads coinProbs = state $ \params ->
+coinProbEst :: Vector R -> Vector R -> State Params (Matrix R)
+coinProbEst heads coinProbs = state $ \params ->
   (columnNormalize (eventProb heads params coinProbs), params)  -- doesn't modify the state
 
 -- M-step = calculate updated theta
@@ -99,16 +99,14 @@ calcUpdatedParams obsvd exps = fromList $
     totalThrows :: Vector R = vector $ replicate numSamps totalThrow
     numSamps :: Int = size $ head sampleExpected
 
--- initialize the state (unknown parameters)
+-- initial coin bias values
 initEm :: Vector R -> State Params ()
-initEm initParams = do
-    put initParams
-    return ()
+initEm = put
 
 -- state contains the parameters.
 -- TODO : make state processing function output a log-likelihood + current state
 emStep :: Vector R -> Vector R -> State Params ()
-emStep heads coinProbs = calcCoinExp heads coinProbs >>= updateParams heads
+emStep heads coinProbs = coinProbEst heads coinProbs >>= updateParams heads
 
 -- one stepper state for EM
 -- after the step, return the current state

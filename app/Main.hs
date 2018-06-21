@@ -19,7 +19,7 @@ main = do
     print $ size observed
     print $ tr' $ eventProb observed theta probCoin
     print $ tr' $ columnSum $ eventProb observed theta probCoin
-    print $ tr' $ coinExpected observed theta probCoin
+    print $ coinExpected observed theta probCoin
     print $ emIterate [theta] observed probCoin 10
 
     -- start using stateful EM
@@ -29,7 +29,7 @@ main = do
     -- theta values after 10 iterations
     print $ fst . runState (initEm (vector [0.1, 0.3]) >> emIter 10) $ vector []
     -- using 'evalState' and pretty printing
-    mapM_ printIterNum $ zip [1..] (evalState (initEm (vector [0.1, 0.3]) >> emIter 10) $ vector [])
+    mapM_ printIterNum $ zip [1..] (evalState (initEm (vector [0.4, 0.6]) >> emIter 10) $ vector [])
 
     -- generate coin samples
     samps <- generateCoinSamples 10 [(0.8, 8), (0.3, 5)]
